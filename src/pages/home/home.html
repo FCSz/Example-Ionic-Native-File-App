@@ -1,0 +1,31 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Native File Root Directories
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <div	*ngFor="let dirInfo of dirsInfo$ | async">
+  	<h1>{{ dirInfo.name }}</h1>
+  	<h4 text-center>Files ({{ (dirInfo.files).length }})</h4>
+  	<div *ngIf="0 == (dirInfo.files).length" class="empty" text-center>< none ></div>
+  	<div *ngFor="let fileName of (dirInfo.files)" class="blue">
+  	{{ fileName }}
+  	</div>
+  	<h4 text-center>Sub-Directories ({{ (dirInfo.directories).length }})</h4>
+  	<div *ngIf="0 == (dirInfo.directories).length" class="empty" text-center>< none ></div>
+  	<div *ngFor="let dirName of (dirInfo.directories)" class="blue">
+  	{{ dirName }}
+  	</div>
+  	<div class="paddingAfter"></div>
+  </div>
+  <div *ngIf="0 < (dirsMissing$ | async).length">
+  	<h1 text-center>Missing Root Directories ({{ (dirsMissing$ | async).length }})</h1>
+  	<div	*ngFor="let dirName of dirsMissing$ | async" class="orange">
+  	{{ dirName }}
+  	</div>
+  	<div class="paddingAfter"></div>
+  </div>
+</ion-content>

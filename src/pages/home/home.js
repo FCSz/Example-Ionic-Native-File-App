@@ -53,14 +53,21 @@ var HomePage = (function () {
                 _this.dirsInfoSubject.next(_this.dirsInfo);
             });
         }).catch(function (reason) {
-            _this.dirsMissing.push(rootDirectory);
+            var strReason = reason.toString();
+            if ("[object Object]" == strReason) {
+                strReason = JSON.stringify(reason);
+            }
+            _this.dirsMissing.push(rootDirectory
+                + " ("
+                + strReason
+                + ")");
             _this.zone.run(function () {
                 _this.dirsMissingSubject.next(_this.dirsMissing);
             });
             console.log("Failed to list entries of directory '"
                 + rootDirectory
                 + "' because '"
-                + reason.toString()
+                + strReason
                 + "'.");
         }); //           catch(...
     };
@@ -93,9 +100,8 @@ var HomePage = (function () {
             for (var _i = 0, rootDirs_1 = rootDirs; _i < rootDirs_1.length; _i++) {
                 var rootDirectory = rootDirs_1[_i];
                 _this.getContentsOfADirectory(rootDirectory, ".");
-            } //         for (let rootDir of rootDirs) {...
-        } //       (valuePlatformReady: any) => {...
-        ); //     then(...  
+            }
+        });
     };
     HomePage.prototype.clearData = function () {
         var _this = this;

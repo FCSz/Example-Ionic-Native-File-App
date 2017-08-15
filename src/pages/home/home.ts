@@ -74,7 +74,14 @@ export class HomePage implements OnInit {
             ).catch(
 
             (reason: any) => {
-                this.dirsMissing.push(rootDirectory);
+                let strReason = reason.toString();
+                if ("[object Object]" == strReason) {
+                    strReason = JSON.stringify(reason);
+                }
+                this.dirsMissing.push(rootDirectory
+                    + " ("
+                    + strReason
+                    + ")");
                 this.zone.run(() => {
                     this.dirsMissingSubject.next(this.dirsMissing);
                 });
@@ -82,7 +89,7 @@ export class HomePage implements OnInit {
                     "Failed to list entries of directory '"
                     + rootDirectory
                     + "' because '"
-                    + reason.toString()
+                    + strReason
                     + "'.");
 
             }
@@ -122,7 +129,7 @@ export class HomePage implements OnInit {
                 // Here you can do any higher level native things you might need.
 
                 for (let rootDirectory of rootDirs) {
-\                    this.getContentsOfADirectory(rootDirectory, ".");
+                    this.getContentsOfADirectory(rootDirectory, ".");
                 }           
             }             
             );      

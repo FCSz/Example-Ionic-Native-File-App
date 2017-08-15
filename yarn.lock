@@ -177,6 +177,14 @@
     localforage "~1.4.2"
     localforage-cordovasqlitedriver "~1.5.0"
 
+"@types/cordova-plugin-device@0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@types/cordova-plugin-device/-/cordova-plugin-device-0.0.3.tgz#9d734e795e4ea52720c564b52bca8366c04be494"
+
+"@types/cordova@0.0.34":
+  version "0.0.34"
+  resolved "https://registry.yarnpkg.com/@types/cordova/-/cordova-0.0.34.tgz#ea7addf74ecec3d7629827a0c39e2c9addc73d04"
+
 "@types/gulp@^3.8.33":
   version "3.8.33"
   resolved "https://registry.yarnpkg.com/@types/gulp/-/gulp-3.8.33.tgz#b1b076820738c9c4eb7808cd926bff1683e1c2ab"

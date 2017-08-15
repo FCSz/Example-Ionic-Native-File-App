@@ -1,4 +1,4 @@
-<ion-header>
+﻿<ion-header>
   <ion-navbar>
     <ion-title>
       Native File Root Directories
@@ -11,13 +11,13 @@
   	<h1>{{ dirInfo.name }}</h1>
   	<h4 text-center>Files ({{ (dirInfo.files).length }})</h4>
   	<div *ngIf="0 == (dirInfo.files).length" class="empty" text-center>< none ></div>
-  	<div *ngFor="let fileName of (dirInfo.files)" class="blue">
-  	{{ fileName }}
+  	<div *ngFor="let fileName of (dirInfo.files).sort()" class="blue">
+  	{{ fileName }} {{ fileName }} 
   	</div>
   	<h4 text-center>Sub-Directories ({{ (dirInfo.directories).length }})</h4>
   	<div *ngIf="0 == (dirInfo.directories).length" class="empty" text-center>< none ></div>
-  	<div *ngFor="let dirName of (dirInfo.directories)" class="blue">
-  	{{ dirName }}
+  	<div *ngFor="let dirName of (dirInfo.directories).sort()" class="blue">
+  	{{ dirName }} {{ dirName }} 
   	</div>
   	<div class="paddingAfter"></div>
   </div>

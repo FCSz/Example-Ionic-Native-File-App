@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+﻿import { Component, OnInit, NgZone } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -75,12 +75,19 @@ export class HomePage implements OnInit {
 
                                 if (entry.isFile) {
                                     dirInfo.files.push(entry.name);
+                                    //dirInfo.files = dirInfo.files.sort();
                                 } else if (entry.isDirectory) {
                                     dirInfo.directories.push(entry.name);
+                                    //dirInfo.directories = dirInfo.directories.sort();
                                 }
 
                             }
                             this.dirsInfo.push(dirInfo);
+                            //this.dirsInfo = this.dirsInfo.sort(
+                            //    (a: DirInfo, b: DirInfo) => {
+                            //        return a.name.localeCompare(b.name);
+                            //    }
+                            //);
                             this.zone.run(() => {
                                 this.dirsInfoSubject.next(this.dirsInfo);
                             });

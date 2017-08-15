@@ -58,12 +58,19 @@ var HomePage = (function () {
                             var entry = listOfEntries_1[_i];
                             if (entry.isFile) {
                                 dirInfo.files.push(entry.name);
+                                //dirInfo.files = dirInfo.files.sort();
                             }
                             else if (entry.isDirectory) {
                                 dirInfo.directories.push(entry.name);
+                                //dirInfo.directories = dirInfo.directories.sort();
                             }
                         }
                         _this.dirsInfo.push(dirInfo);
+                        //this.dirsInfo = this.dirsInfo.sort(
+                        //    (a: DirInfo, b: DirInfo) => {
+                        //        return a.name.localeCompare(b.name);
+                        //    }
+                        //);
                         _this.zone.run(function () {
                             _this.dirsInfoSubject.next(_this.dirsInfo);
                         });

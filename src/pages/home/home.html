@@ -12,18 +12,18 @@
   	<h4 text-center>Files ({{ (dirInfo.files).length }})</h4>
   	<div *ngIf="0 == (dirInfo.files).length" class="empty" text-center>< none ></div>
   	<div *ngFor="let fileName of (dirInfo.files).sort()" class="blue">
-  	{{ fileName }} {{ fileName }} 
+  	{{ fileName }}
   	</div>
   	<h4 text-center>Sub-Directories ({{ (dirInfo.directories).length }})</h4>
   	<div *ngIf="0 == (dirInfo.directories).length" class="empty" text-center>< none ></div>
   	<div *ngFor="let dirName of (dirInfo.directories).sort()" class="blue">
-  	{{ dirName }} {{ dirName }} 
+  	{{ dirName }}
   	</div>
   	<div class="paddingAfter"></div>
   </div>
   <div *ngIf="0 < (dirsMissing$ | async).length">
   	<h1 text-center>Missing Root Directories ({{ (dirsMissing$ | async).length }})</h1>
-  	<div	*ngFor="let dirName of dirsMissing$ | async" class="orange">
+  	<div	*ngFor="let dirName of (dirsMissing$ | async).sort()" class="orange">
   	{{ dirName }}
   	</div>
   	<div class="paddingAfter"></div>

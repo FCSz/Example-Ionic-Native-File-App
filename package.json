@@ -56,7 +56,8 @@
         "typescript": "2.3.4"
     },
     "homepage": "http://ionicframework.com/",
-    "name": "NATIVEFILE",
+    "license": "MIT",
+    "name": "ionic_native_file_example",
     "private": true,
     "scripts": {
         "clean": "ionic-app-scripts clean",

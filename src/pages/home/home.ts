@@ -5,7 +5,8 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { File, Entry } from '@ionic-native/file';
 
 export type DirInfo = {
-    name: string;
+    rootDirName: string;
+    path: string;
     files: [string];
     directories: [string];
 };
@@ -34,6 +35,68 @@ export class HomePage implements OnInit {
 
     ngOnInit() {
 
+        this.showRootDirectories();
+    }
+
+    getContentsOfADirectory(rootDirectory: string, path: string) {
+
+        this.fileService.listDir(this.fileService[rootDirectory], path)
+            .then(
+
+            (listOfEntries: Entry[]) => {
+
+                let dirInfo: DirInfo = {
+                    rootDirName: (rootDirectory),
+                    path: path,
+                    files: <[string]>[],
+                    directories: <[string]>[]
+                }
+
+                for (let entry of listOfEntries) {
+
+                    if (entry.isFile) {
+                        dirInfo.files.push(entry.name);
+                    } else if (entry.isDirectory) {
+                        dirInfo.directories.push(entry.name);
+                    }
+
+                }
+                this.dirsInfo.push(dirInfo);
+                this.dirsInfo = this.dirsInfo.sort(
+                    (a: DirInfo, b: DirInfo) => {
+                        return a.rootDirName.localeCompare(b.rootDirName);
+                    }
+                );
+                this.zone.run(() => {
+                    this.dirsInfoSubject.next(this.dirsInfo);
+                });
+            }
+            ).catch(
+
+            (reason: any) => {
+                this.dirsMissing.push(rootDirectory);
+                this.zone.run(() => {
+                    this.dirsMissingSubject.next(this.dirsMissing);
+                });
+                console.log(
+                    "Failed to list entries of directory '"
+                    + rootDirectory
+                    + "' because '"
+                    + reason.toString()
+                    + "'.");
+
+            }
+            );    //           catch(...
+    }
+
+    showDir(dirInfo: DirInfo, subDirName: string) {
+
+        this.clearData();
+        this.getContentsOfADirectory(dirInfo.rootDirName, dirInfo.path + "/" + subDirName);
+    }
+
+    showRootDirectories() {
+
         const rootDirs: [string] = [
             "applicationDirectory",
             "applicationStorageDirectory",
@@ -49,6 +112,8 @@ export class HomePage implements OnInit {
             "tempDirectory",
         ];
 
+        this.clearData();
+
         this.platform
             .ready()
             .then(
@@ -57,61 +122,20 @@ export class HomePage implements OnInit {
                 // Here you can do any higher level native things you might need.
 
                 for (let rootDirectory of rootDirs) {
+\                    this.getContentsOfADirectory(rootDirectory, ".");
+                }           
+            }             
+            );      
+    }
 
-                    ((rootDir: string) => {
+    clearData() {
 
-                    this.fileService.listDir(this.fileService[rootDir], ".")
-                        .then(
-
-                        (listOfEntries: Entry[]) => {
-
-                            let dirInfo: DirInfo = {
-                                name: rootDir,
-                                files: <[string]>[],
-                                directories: <[string]>[]
-                            }
-
-                            for (let entry of listOfEntries) {
-
-                                if (entry.isFile) {
-                                    dirInfo.files.push(entry.name);
-                                    //dirInfo.files = dirInfo.files.sort();
-                                } else if (entry.isDirectory) {
-                                    dirInfo.directories.push(entry.name);
-                                    //dirInfo.directories = dirInfo.directories.sort();
-                                }
-
-                            }
-                            this.dirsInfo.push(dirInfo);
-                            //this.dirsInfo = this.dirsInfo.sort(
-                            //    (a: DirInfo, b: DirInfo) => {
-                            //        return a.name.localeCompare(b.name);
-                            //    }
-                            //);
-                            this.zone.run(() => {
-                                this.dirsInfoSubject.next(this.dirsInfo);
-                            });
-                        }
-                        ).catch(
-
-                        (reason: any) => {
-                            this.dirsMissing.push(rootDir);
-                            this.zone.run(() => {
-                                this.dirsMissingSubject.next(this.dirsMissing);
-                            });
-                            console.log(
-                                "Failed to list entries of directory '"
-                                + rootDir
-                                + "' because '"
-                                + reason.toString()
-                                + "'.");
-
-                        }
-                        );    //           catch(...
-                    })(rootDirectory);
-                }             //         for (let rootDir of rootDirs) {...
-            }                 //       (valuePlatformReady: any) => {...
-            );                //     then(...  
-    }                         //   ngOnInit() {...
-}                             // class
+        this.dirsInfo = <[DirInfo]>[];
+        this.dirsMissing = <[string]>[];
+        this.zone.run(() => {
+            this.dirsInfoSubject.next(this.dirsInfo);
+            this.dirsMissingSubject.next(this.dirsMissing);
+        });
+    }
+}       // class
 

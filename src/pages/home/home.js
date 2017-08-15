@@ -24,6 +24,51 @@ var HomePage = (function () {
         this.dirsMissing$ = this.dirsMissingSubject.asObservable();
     }
     HomePage.prototype.ngOnInit = function () {
+        this.showRootDirectories();
+    };
+    HomePage.prototype.getContentsOfADirectory = function (rootDirectory, path) {
+        var _this = this;
+        this.fileService.listDir(this.fileService[rootDirectory], path)
+            .then(function (listOfEntries) {
+            var dirInfo = {
+                rootDirName: (rootDirectory),
+                path: path,
+                files: [],
+                directories: []
+            };
+            for (var _i = 0, listOfEntries_1 = listOfEntries; _i < listOfEntries_1.length; _i++) {
+                var entry = listOfEntries_1[_i];
+                if (entry.isFile) {
+                    dirInfo.files.push(entry.name);
+                }
+                else if (entry.isDirectory) {
+                    dirInfo.directories.push(entry.name);
+                }
+            }
+            _this.dirsInfo.push(dirInfo);
+            _this.dirsInfo = _this.dirsInfo.sort(function (a, b) {
+                return a.rootDirName.localeCompare(b.rootDirName);
+            });
+            _this.zone.run(function () {
+                _this.dirsInfoSubject.next(_this.dirsInfo);
+            });
+        }).catch(function (reason) {
+            _this.dirsMissing.push(rootDirectory);
+            _this.zone.run(function () {
+                _this.dirsMissingSubject.next(_this.dirsMissing);
+            });
+            console.log("Failed to list entries of directory '"
+                + rootDirectory
+                + "' because '"
+                + reason.toString()
+                + "'.");
+        }); //           catch(...
+    };
+    HomePage.prototype.showDir = function (dirInfo, subDirName) {
+        this.clearData();
+        this.getContentsOfADirectory(dirInfo.rootDirName, dirInfo.path + "/" + subDirName);
+    };
+    HomePage.prototype.showRootDirectories = function () {
         var _this = this;
         var rootDirs = [
             "applicationDirectory",
@@ -39,6 +84,7 @@ var HomePage = (function () {
             "syncedDataDirectory",
             "tempDirectory",
         ];
+        this.clearData();
         this.platform
             .ready()
             .then(function (valuePlatformReady) {
@@ -46,50 +92,20 @@ var HomePage = (function () {
             // Here you can do any higher level native things you might need.
             for (var _i = 0, rootDirs_1 = rootDirs; _i < rootDirs_1.length; _i++) {
                 var rootDirectory = rootDirs_1[_i];
-                (function (rootDir) {
-                    _this.fileService.listDir(_this.fileService[rootDir], ".")
-                        .then(function (listOfEntries) {
-                        var dirInfo = {
-                            name: rootDir,
-                            files: [],
-                            directories: []
-                        };
-                        for (var _i = 0, listOfEntries_1 = listOfEntries; _i < listOfEntries_1.length; _i++) {
-                            var entry = listOfEntries_1[_i];
-                            if (entry.isFile) {
-                                dirInfo.files.push(entry.name);
-                                //dirInfo.files = dirInfo.files.sort();
-                            }
-                            else if (entry.isDirectory) {
-                                dirInfo.directories.push(entry.name);
-                                //dirInfo.directories = dirInfo.directories.sort();
-                            }
-                        }
-                        _this.dirsInfo.push(dirInfo);
-                        //this.dirsInfo = this.dirsInfo.sort(
-                        //    (a: DirInfo, b: DirInfo) => {
-                        //        return a.name.localeCompare(b.name);
-                        //    }
-                        //);
-                        _this.zone.run(function () {
-                            _this.dirsInfoSubject.next(_this.dirsInfo);
-                        });
-                    }).catch(function (reason) {
-                        _this.dirsMissing.push(rootDir);
-                        _this.zone.run(function () {
-                            _this.dirsMissingSubject.next(_this.dirsMissing);
-                        });
-                        console.log("Failed to list entries of directory '"
-                            + rootDir
-                            + "' because '"
-                            + reason.toString()
-                            + "'.");
-                    }); //           catch(...
-                })(rootDirectory);
+                _this.getContentsOfADirectory(rootDirectory, ".");
             } //         for (let rootDir of rootDirs) {...
         } //       (valuePlatformReady: any) => {...
         ); //     then(...  
-    }; //   ngOnInit() {...
+    };
+    HomePage.prototype.clearData = function () {
+        var _this = this;
+        this.dirsInfo = [];
+        this.dirsMissing = [];
+        this.zone.run(function () {
+            _this.dirsInfoSubject.next(_this.dirsInfo);
+            _this.dirsMissingSubject.next(_this.dirsMissing);
+        });
+    };
     return HomePage;
 }()); // class
 HomePage = __decorate([

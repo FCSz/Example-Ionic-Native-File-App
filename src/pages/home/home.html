@@ -1,5 +1,14 @@
 ﻿<ion-header>
   <ion-navbar>
+    <ion-buttons end>
+      <button 
+          item-left 
+          primary
+          (click)="showRootDirectories()"
+      >
+        <ion-icon name="home"></ion-icon>
+      </button>
+    </ion-buttons>    
     <ion-title>
       Native File Root Directories
     </ion-title>
@@ -8,7 +17,7 @@
 
 <ion-content padding>
   <div	*ngFor="let dirInfo of dirsInfo$ | async">
-  	<h1>{{ dirInfo.name }}</h1>
+  	<h1>{{ dirInfo.rootDirName + "/" + dirInfo.path }}</h1>
   	<h4 text-center>Files ({{ (dirInfo.files).length }})</h4>
   	<div *ngIf="0 == (dirInfo.files).length" class="empty" text-center>< none ></div>
   	<div *ngFor="let fileName of (dirInfo.files).sort()" class="blue">
@@ -16,7 +25,11 @@
   	</div>
   	<h4 text-center>Sub-Directories ({{ (dirInfo.directories).length }})</h4>
   	<div *ngIf="0 == (dirInfo.directories).length" class="empty" text-center>< none ></div>
-  	<div *ngFor="let dirName of (dirInfo.directories).sort()" class="blue">
+  	<div 
+         *ngFor="let dirName of (dirInfo.directories).sort()" 
+         class="blue"
+         (click)="showDir(dirInfo, dirName)"
+    >
   	{{ dirName }}
   	</div>
   	<div class="paddingAfter"></div>

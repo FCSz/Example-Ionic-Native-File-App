@@ -16,6 +16,9 @@ var HomePage = (function () {
         this.fileService = fileService;
         this.platform = platform;
         this.zone = zone;
+        this.messages = [];
+        // A dictionary/map of root directories and paths by their names
+        this.rootDirs = {};
         this.dirsInfo = [];
         this.dirsInfoSubject = new BehaviorSubject([]);
         this.dirsInfo$ = this.dirsInfoSubject.asObservable();
@@ -24,15 +27,48 @@ var HomePage = (function () {
         this.dirsMissing$ = this.dirsMissingSubject.asObservable();
     }
     HomePage.prototype.ngOnInit = function () {
-        this.showRootDirectories();
-    };
-    HomePage.prototype.getContentsOfADirectory = function (rootDirectory, path) {
         var _this = this;
-        this.fileService.listDir(this.fileService[rootDirectory], path)
+        this.platform
+            .ready()
+            .then(function (valuePlatformReady) {
+            // Okay, so the platform is ready and our plugins are available.
+            // Here you can do any higher level native things you might need.
+            _this.rootDirs = {
+                "applicationDirectory": { "dir": (_this.fileService.applicationDirectory || ""), "path": "./" },
+                "applicationDirectory/.": { "dir": (_this.fileService.applicationDirectory || ""), "path": "www/" },
+                "applicationStorageDirectory": { "dir": (_this.fileService.applicationStorageDirectory || ""), "path": "./" },
+                "dataDirectory": { "dir": (_this.fileService.dataDirectory || ""), "path": "./" },
+                "cacheDirectory": { "dir": (_this.fileService.cacheDirectory || ""), "path": "./" },
+                "documentsDirectory": { "dir": (_this.fileService.documentsDirectory || ""), "path": "./" },
+                "externalApplicationStorageDirectory": { "dir": (_this.fileService.externalApplicationStorageDirectory || ""), "path": "./" },
+                "externalDataDirectory": { "dir": (_this.fileService.externalDataDirectory || ""), "path": "./" },
+                "externalCacheDirectory": { "dir": (_this.fileService.externalCacheDirectory || ""), "path": "./" },
+                "externalRootDirectory": { "dir": (_this.fileService.externalRootDirectory || ""), "path": "./" },
+                "sharedDirectory": { "dir": (_this.fileService.sharedDirectory || ""), "path": "./" },
+                "syncedDataDirectory": { "dir": (_this.fileService.syncedDataDirectory || ""), "path": "./" },
+                "tempDirectory": { "dir": (_this.fileService.tempDirectory || ""), "path": "./" },
+            };
+            _this.showRootDirectories();
+        }).catch(function (reason) {
+            _this.myTrace("HomePage.ngOnInit() Failed because '"
+                + reason
+                + "'.");
+        });
+    };
+    HomePage.prototype.getContentsOfADirectory = function (rootDirName, rootDir, path) {
+        var _this = this;
+        this.myTrace("  > getContentsOfADirectory( "
+            + rootDirName
+            + ", >>"
+            + rootDir.toString()
+            + "<<, "
+            + path
+            + " )");
+        this.fileService.listDir(rootDir, path)
             .then(function (listOfEntries) {
             var dirInfo = {
-                rootDirName: (rootDirectory),
-                path: path,
+                rootDirName: (rootDirName),
+                rootPath: path,
                 files: [],
                 directories: []
             };
@@ -57,15 +93,15 @@ var HomePage = (function () {
             if ("[object Object]" == strReason) {
                 strReason = JSON.stringify(reason);
             }
-            _this.dirsMissing.push(rootDirectory
+            _this.dirsMissing.push(rootDirName
                 + " ("
                 + strReason
                 + ")");
             _this.zone.run(function () {
                 _this.dirsMissingSubject.next(_this.dirsMissing);
             });
-            console.log("Failed to list entries of directory '"
-                + rootDirectory
+            _this.myTrace("Failed to list entries of directory '"
+                + rootDirName
                 + "' because '"
                 + strReason
                 + "'.");
@@ -73,35 +109,14 @@ var HomePage = (function () {
     };
     HomePage.prototype.showDir = function (dirInfo, subDirName) {
         this.clearData();
-        this.getContentsOfADirectory(dirInfo.rootDirName, dirInfo.path + "/" + subDirName);
+        this.getContentsOfADirectory(dirInfo.rootDirName, this.rootDirs[dirInfo.rootDirName].dir, dirInfo.rootPath + subDirName + "/");
     };
     HomePage.prototype.showRootDirectories = function () {
-        var _this = this;
-        var rootDirs = [
-            "applicationDirectory",
-            "applicationStorageDirectory",
-            "dataDirectory",
-            "cacheDirectory",
-            "documentsDirectory",
-            "externalApplicationStorageDirectory",
-            "externalDataDirectory",
-            "externalCacheDirectory",
-            "externalRootDirectory",
-            "sharedDirectory",
-            "syncedDataDirectory",
-            "tempDirectory",
-        ];
         this.clearData();
-        this.platform
-            .ready()
-            .then(function (valuePlatformReady) {
-            // Okay, so the platform is ready and our plugins are available.
-            // Here you can do any higher level native things you might need.
-            for (var _i = 0, rootDirs_1 = rootDirs; _i < rootDirs_1.length; _i++) {
-                var rootDirectory = rootDirs_1[_i];
-                _this.getContentsOfADirectory(rootDirectory, ".");
-            }
-        });
+        for (var _i = 0, _a = Object.keys(this.rootDirs); _i < _a.length; _i++) {
+            var rootDirName = _a[_i];
+            this.getContentsOfADirectory(rootDirName, this.rootDirs[rootDirName].dir, this.rootDirs[rootDirName].path);
+        }
     };
     HomePage.prototype.clearData = function () {
         var _this = this;
@@ -110,6 +125,13 @@ var HomePage = (function () {
         this.zone.run(function () {
             _this.dirsInfoSubject.next(_this.dirsInfo);
             _this.dirsMissingSubject.next(_this.dirsMissing);
+        });
+    };
+    HomePage.prototype.myTrace = function (message) {
+        var _this = this;
+        console.log(message);
+        this.zone.run(function () {
+            _this.messages.push(message);
         });
     };
     return HomePage;
